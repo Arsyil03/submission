@@ -1,6 +1,11 @@
 import streamlit as st
 import pandas as pd
 
+st.set_page_config(
+    page_title="Dashboard Suhu Kota",
+    layout="wide",
+    initial_sidebar_state="expanded"
+
 uploaded_file = st.file_uploader("Upload file CSV", type=["csv"])
 if uploaded_file is not None:
     df_air_quality = pd.read_csv(uploaded_file)
@@ -10,10 +15,6 @@ df_air_quality["year"] = pd.to_datetime(df_air_quality["year"], format='%Y')
 df_air_quality.fillna(df_air_quality.select_dtypes(include=['number']).mean(numeric_only=True), inplace=True)
 
 
-st.set_page_config(
-    page_title="Dashboard Suhu Kota",
-    layout="wide",
-    initial_sidebar_state="expanded"
 )
 
 
