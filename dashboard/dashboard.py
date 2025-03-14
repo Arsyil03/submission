@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-df_air_quality = pd.read_csv(r"/dashboard/main_data.csv")
+df_air_quality = pd.read_csv(r"C:\Users\muham\Documents\Dicoding\AnalisisData\submission\dashboard\main_data.csv")
 
 df_air_quality["year"] = pd.to_datetime(df_air_quality["year"], format='%Y')
 df_air_quality.fillna(df_air_quality.select_dtypes(include=['number']).mean(numeric_only=True), inplace=True)
