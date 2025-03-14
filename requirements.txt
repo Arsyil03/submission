@@ -1,0 +1,7 @@
+python == 3.12.7
+pandas == 2.2.2
+matplotlib == 3.9.2
+saeborn == 0.13.2
+streamlit == 1.37.1
+zipfile == bawaan python
+os == bawaan python 
