@@ -1,41 +1,34 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
 
-# **Load Data**
 data_path = r"C:\Users\muham\Documents\Dicoding\AnalisisData\submission/dashboard/main_data.csv"
 df_air_quality = pd.read_csv(data_path)
 
-# **Convert Date Column to Datetime**
 df_air_quality["year"] = pd.to_datetime(df_air_quality["year"], format='%Y')
-
-# **Handle Missing Values**
 df_air_quality.fillna(df_air_quality.select_dtypes(include=['number']).mean(numeric_only=True), inplace=True)
 
-# **Streamlit Page Config**
+
 st.set_page_config(
     page_title="Dashboard Suhu Kota",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# **Sidebar Navigation**
+
 st.sidebar.image("https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Flag_of_the_People%27s_Republic_of_China.svg/200px-Flag_of_the_People%27s_Republic_of_China.svg.png",
                   use_column_width=True)
 
 st.sidebar.title("\U0001F3D9️ Navigasi")
 page = st.sidebar.radio("Pilih Halaman", ["\U0001F4CA Data", "\U0001F4C8 Visualisasi"])
 
-# **Filter by Year**
+
 st.sidebar.subheader("Filter Tahun")
 selected_year = st.sidebar.selectbox("Pilih Tahun", df_air_quality["year"].dt.year.unique())
 df_filtered = df_air_quality[df_air_quality["year"].dt.year == selected_year]
 
-# **Calculate Average Temperature Per City**
 city_temperature = df_filtered.groupby("City")["TEMP"].mean().reset_index()
 city_temperature = city_temperature.sort_values(by="TEMP", ascending=False)
 
-# **Main Title**
 st.title("\U0001F30D Dashboard Suhu Rata-rata Kota di Negara China (2013-2017)")
 st.markdown("---")
 
