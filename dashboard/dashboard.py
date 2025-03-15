@@ -3,7 +3,9 @@ import pandas as pd
 import os
 
 # Path relatif ke file CSV
-csv_path = os.path.join(os.path.dirname(__file__), "submission/dashboard/main_data.csv")
+csv_path = "submission/dashboard/main_data.csv"
+
+st.write(f"Mencari file di: {os.path.abspath(csv_path)}")
 
 # Pastikan file tersedia sebelum membaca
 if os.path.exists(csv_path):
