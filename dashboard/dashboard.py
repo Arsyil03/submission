@@ -1,25 +1,14 @@
 import streamlit as st
 import pandas as pd
-import os
+import plotly.express as px
 
-# Path relatif ke file CSV
-csv_path = "submission/dashboard/main_data.csv"
+# Load Data
+df_air_quality = pd.read_csv(r"C:\Users\muham\Documents\Dicoding\AnalisisData\submission\dashboard\main_data.csv")
 
-st.write(f"Mencari file di: {os.path.abspath(csv_path)}")
+df_air_quality["year"] = pd.to_datetime(df_air_quality["year"], format='%Y').dt.year  # Convert to int
+df_air_quality.fillna(df_air_quality.select_dtypes(include=['number']).mean(numeric_only=True), inplace=True)
 
-# Pastikan file tersedia sebelum membaca
-if os.path.exists(csv_path):
-    df_air_quality = pd.read_csv(csv_path)
-else:
-    st.error(f"File '{csv_path}' tidak ditemukan! Pastikan file tersedia.")
-    st.stop()
-
-# Konversi kolom 'year' ke datetime
-df_air_quality["year"] = pd.to_datetime(df_air_quality["year"], format='%Y')
-
-# Mengisi nilai NaN dengan rata-rata numerik
-df_air_quality.fillna(df_air_quality.select_dtypes(include=['number']).mean(), inplace=True)
-
+# Streamlit Config
 st.set_page_config(
     page_title="Dashboard Suhu Kota",
     layout="wide",
@@ -27,16 +16,16 @@ st.set_page_config(
 )
 
 st.sidebar.image("https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Flag_of_the_People%27s_Republic_of_China.svg/200px-Flag_of_the_People%27s_Republic_of_China.svg.png",
-                  use_column_width=True)
+                 use_column_width=True)
 
 st.sidebar.title("\U0001F3D9️ Navigasi")
 page = st.sidebar.radio("Pilih Halaman", ["\U0001F4CA Data", "\U0001F4C8 Visualisasi"])
 
 st.sidebar.subheader("Filter Tahun")
-selected_year = st.sidebar.selectbox("Pilih Tahun", df_air_quality["year"].dt.year.unique())
+selected_year = st.sidebar.selectbox("Pilih Tahun", sorted(df_air_quality["year"].unique()))
+df_filtered = df_air_quality[df_air_quality["year"] == selected_year]
 
-df_filtered = df_air_quality[df_air_quality["year"].dt.year == selected_year]
-
+# Temperature Data Processing
 city_temperature = df_filtered.groupby("City")["TEMP"].mean().reset_index()
 city_temperature = city_temperature.sort_values(by="TEMP", ascending=False)
 
@@ -56,7 +45,7 @@ if not city_temperature.empty:
         st.metric(label="\u2744️ Kota Terdingin", 
                   value=coldest_city["City"], 
                   delta=f"{coldest_city['TEMP']:.2f}°C")
-
+    
     st.markdown("---")
 
     if page == "\U0001F4CA Data":
@@ -65,30 +54,39 @@ if not city_temperature.empty:
     
     elif page == "\U0001F4C8 Visualisasi":
         st.subheader("Grafik Suhu Rata-rata per Kota")
-        st.bar_chart(city_temperature.set_index("City"))
-
-        # Grafik Kota dengan Suhu Maksimum & Minimum Sepanjang Tahun
+        fig = px.bar(city_temperature, x="TEMP", y="City", 
+                     title=f"Urutan Kota dengan Suhu Rata-rata ({selected_year})",
+                     labels={"TEMP": "Suhu Rata-rata (°C)", "City": "Kota"},
+                     color="TEMP", color_continuous_scale="Blues",
+                     orientation="h")
+        st.plotly_chart(fig, use_container_width=True)
+        
+        # Visualization: Hottest & Coldest Cities Across All Years
         st.subheader("Kota dengan Suhu Tertinggi & Terendah di Semua Tahun")
 
         city_max_temp = df_air_quality.groupby("City")["TEMP"].max().reset_index()
-        city_max_temp = city_max_temp.sort_values(by="TEMP", ascending=False)
+        city_max_temp = city_max_temp.sort_values(by="TEMP", ascending=False).head(10)
 
         city_min_temp = df_air_quality.groupby("City")["TEMP"].min().reset_index()
-        city_min_temp = city_min_temp.sort_values(by="TEMP", ascending=True)
-
-        hottest_city_all_years = city_max_temp.iloc[0]
-        coldest_city_all_years = city_min_temp.iloc[0]
+        city_min_temp = city_min_temp.sort_values(by="TEMP", ascending=True).head(10)
 
         col1, col2 = st.columns(2)
+
         with col1:
-            st.metric(label="\U0001F321️ Kota Terpanas Sepanjang Tahun", 
-                      value=hottest_city_all_years["City"], 
-                      delta=f"{hottest_city_all_years['TEMP']:.2f}°C")
-            st.subheader("Top 10 Kota dengan Suhu Tertinggi")
-            st.bar_chart(city_max_temp.head(10).set_index("City"))
+            fig_max_temp = px.bar(city_max_temp, x="TEMP", y="City", 
+                                  title="Top 10 Kota dengan Suhu Tertinggi Sepanjang Tahun",
+                                  labels={"TEMP": "Suhu Maksimum (°C)", "City": "Kota"},
+                                  color="TEMP", color_continuous_scale="Reds",
+                                  orientation="h")
+            fig_max_temp.update_yaxes(categoryorder="total ascending")
+            st.plotly_chart(fig_max_temp, use_container_width=True)
+
         with col2:
-            st.metric(label="\u2744️ Kota Terdingin Sepanjang Tahun", 
-                      value=coldest_city_all_years["City"], 
-                      delta=f"{coldest_city_all_years['TEMP']:.2f}°C")
-            st.subheader("Top 10 Kota dengan Suhu Terendah")
-            st.bar_chart(city_min_temp.head(10).set_index("City"))
+            fig_min_temp = px.bar(city_min_temp, x="TEMP", y="City", 
+                                  title="Top 10 Kota dengan Suhu Terendah Sepanjang Tahun",
+                                  labels={"TEMP": "Suhu Minimum (°C)", "City": "Kota"},
+                                  color="TEMP", color_continuous_scale="Blues",
+                                  orientation="h")
+            fig_min_temp.update_yaxes(categoryorder="total descending")
+            st.plotly_chart(fig_min_temp, use_container_width=True)
+            
