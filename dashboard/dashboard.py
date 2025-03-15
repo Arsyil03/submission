@@ -1,10 +1,22 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as px
+import os
 
-df_air_quality = pd.read_csv(r"C:\Users\muham\Documents\Dicoding\AnalisisData\submission\dashboard\main_data.csv")
+# Path relatif ke file CSV
+csv_path = "main_data.csv"
 
+# Pastikan file tersedia sebelum membaca
+if os.path.exists(csv_path):
+    df_air_quality = pd.read_csv(csv_path)
+else:
+    st.error(f"File '{csv_path}' tidak ditemukan! Pastikan file tersedia.")
+    st.stop()
+
+# Konversi kolom 'year' ke datetime
 df_air_quality["year"] = pd.to_datetime(df_air_quality["year"], format='%Y')
 
+# Mengisi nilai NaN dengan rata-rata numerik
 df_air_quality.fillna(df_air_quality.select_dtypes(include=['number']).mean(numeric_only=True), inplace=True)
 
 st.set_page_config(
@@ -21,6 +33,7 @@ page = st.sidebar.radio("Pilih Halaman", ["\U0001F4CA Data", "\U0001F4C8 Visuali
 
 st.sidebar.subheader("Filter Tahun")
 selected_year = st.sidebar.selectbox("Pilih Tahun", df_air_quality["year"].dt.year.unique())
+
 df_filtered = df_air_quality[df_air_quality["year"].dt.year == selected_year]
 
 city_temperature = df_filtered.groupby("City")["TEMP"].mean().reset_index()
@@ -57,7 +70,7 @@ if not city_temperature.empty:
                      color="TEMP", color_continuous_scale="Blues",
                      orientation="h")
         st.plotly_chart(fig, use_container_width=True)
-        
+
         # **Visualization: Hottest & Coldest Cities Across All Years**
         st.subheader("Kota dengan Suhu Tertinggi & Terendah di Semua Tahun")
 
@@ -84,7 +97,5 @@ if not city_temperature.empty:
                                   labels={"TEMP": "Suhu Minimum (°C)", "City": "Kota"},
                                   color="TEMP", color_continuous_scale="Blues",
                                   orientation="h")
-            fig_min_temp.update_yaxes(categoryorder="total descending")
-            st.plotly_chart(fig_min_temp, use_container_width=True)
             fig_min_temp.update_yaxes(categoryorder="total descending")
             st.plotly_chart(fig_min_temp, use_container_width=True)
