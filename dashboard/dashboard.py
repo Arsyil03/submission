@@ -4,7 +4,7 @@ import plotly.express as px
 import os
 
 # Path relatif ke file CSV
-csv_path = "main_data.csv"
+csv_path = r"submission/dashboard/main_data.csv"
 
 # Pastikan file tersedia sebelum membaca
 if os.path.exists(csv_path):
