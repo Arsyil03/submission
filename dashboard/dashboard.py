@@ -2,13 +2,11 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# Load Data
-df_air_quality = pd.read_csv(r"C:\Users\muham\Documents\Dicoding\AnalisisData\submission\dashboard\main_data.csv")
+.read_csv(r"C:\Users\muham\Documents\Dicoding\AnalisisData\submission\dashboard\main_data.csv")
 
 df_air_quality["year"] = pd.to_datetime(df_air_quality["year"], format='%Y').dt.year  # Convert to int
 df_air_quality.fillna(df_air_quality.select_dtypes(include=['number']).mean(numeric_only=True), inplace=True)
 
-# Streamlit Config
 st.set_page_config(
     page_title="Dashboard Suhu Kota",
     layout="wide",
@@ -25,7 +23,6 @@ st.sidebar.subheader("Filter Tahun")
 selected_year = st.sidebar.selectbox("Pilih Tahun", sorted(df_air_quality["year"].unique()))
 df_filtered = df_air_quality[df_air_quality["year"] == selected_year]
 
-# Temperature Data Processing
 city_temperature = df_filtered.groupby("City")["TEMP"].mean().reset_index()
 city_temperature = city_temperature.sort_values(by="TEMP", ascending=False)
 
@@ -61,7 +58,6 @@ if not city_temperature.empty:
                      orientation="h")
         st.plotly_chart(fig, use_container_width=True)
         
-        # Visualization: Hottest & Coldest Cities Across All Years
         st.subheader("Kota dengan Suhu Tertinggi & Terendah di Semua Tahun")
 
         city_max_temp = df_air_quality.groupby("City")["TEMP"].max().reset_index()
@@ -89,4 +85,3 @@ if not city_temperature.empty:
                                   orientation="h")
             fig_min_temp.update_yaxes(categoryorder="total descending")
             st.plotly_chart(fig_min_temp, use_container_width=True)
-            
