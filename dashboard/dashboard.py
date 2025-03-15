@@ -1,29 +1,24 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as px
+
+df_air_quality = pd.read_csv(r"C:\Users\muham\Documents\Dicoding\AnalisisData\submission\dashboard\main_data.csv")
+
+df_air_quality["year"] = pd.to_datetime(df_air_quality["year"], format='%Y')
+
+df_air_quality.fillna(df_air_quality.select_dtypes(include=['number']).mean(numeric_only=True), inplace=True)
 
 st.set_page_config(
     page_title="Dashboard Suhu Kota",
     layout="wide",
     initial_sidebar_state="expanded"
-
-uploaded_file = st.file_uploader("Upload file CSV", type=["csv"])
-if uploaded_file is not None:
-    df_air_quality = pd.read_csv(uploaded_file)
-    st.write("File berhasil diunggah!")
-
-df_air_quality["year"] = pd.to_datetime(df_air_quality["year"], format='%Y')
-df_air_quality.fillna(df_air_quality.select_dtypes(include=['number']).mean(numeric_only=True), inplace=True)
-
-
 )
-
 
 st.sidebar.image("https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Flag_of_the_People%27s_Republic_of_China.svg/200px-Flag_of_the_People%27s_Republic_of_China.svg.png",
                   use_column_width=True)
 
 st.sidebar.title("\U0001F3D9️ Navigasi")
 page = st.sidebar.radio("Pilih Halaman", ["\U0001F4CA Data", "\U0001F4C8 Visualisasi"])
-
 
 st.sidebar.subheader("Filter Tahun")
 selected_year = st.sidebar.selectbox("Pilih Tahun", df_air_quality["year"].dt.year.unique())
@@ -90,5 +85,7 @@ if not city_temperature.empty:
                                   labels={"TEMP": "Suhu Minimum (°C)", "City": "Kota"},
                                   color="TEMP", color_continuous_scale="Blues",
                                   orientation="h")
+            fig_min_temp.update_yaxes(categoryorder="total descending")
+            st.plotly_chart(fig_min_temp, use_container_width=True)
             fig_min_temp.update_yaxes(categoryorder="total descending")
             st.plotly_chart(fig_min_temp, use_container_width=True)
