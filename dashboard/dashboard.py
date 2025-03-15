@@ -3,7 +3,7 @@ import pandas as pd
 import os
 
 # Path relatif ke file CSV
-csv_path = r"submission/dashboard/main_data.csv"
+csv_path = os.path.join(os.path.dirname(__file__), "submission/dashboard/main_data.csv")
 
 # Pastikan file tersedia sebelum membaca
 if os.path.exists(csv_path):
@@ -83,10 +83,10 @@ if not city_temperature.empty:
                       value=hottest_city_all_years["City"], 
                       delta=f"{hottest_city_all_years['TEMP']:.2f}°C")
             st.subheader("Top 10 Kota dengan Suhu Tertinggi")
-            st.bar_chart(city_max_temp.nlargest(10, "TEMP").set_index("City"))
+            st.bar_chart(city_max_temp.head(10).set_index("City"))
         with col2:
             st.metric(label="\u2744️ Kota Terdingin Sepanjang Tahun", 
                       value=coldest_city_all_years["City"], 
                       delta=f"{coldest_city_all_years['TEMP']:.2f}°C")
             st.subheader("Top 10 Kota dengan Suhu Terendah")
-            st.bar_chart(city_min_temp.nsmallest(10, "TEMP").set_index("City"))
+            st.bar_chart(city_min_temp.head(10).set_index("City"))
